@@ -575,6 +575,32 @@ class OpenIDConnectClient
 
     }
 
+    public function getUserInfo() {
+
+        // Check to see if the attribute is already in memory
+        if ($this->userInfo) {
+            return $this->userInfo;
+        }
+
+        $user_info_endpoint = $this->getProviderConfigValue("userinfo_endpoint");
+        $schema = 'openid';
+
+        $user_info_endpoint .= "?schema=" . $schema;
+
+        //The accessToken has to be send in the Authorization header, so we create a new array with only this header.
+        $headers = array("Authorization: Bearer {$this->accessToken}");
+
+        $user_json = json_decode($this->fetchURL($user_info_endpoint,null,$headers));
+
+        $this->userInfo = $user_json;
+
+        if ($this->userInfo) {
+            return $this->userInfo;
+        }
+
+        return null;
+
+    }
 
     /**
      * @param $url
