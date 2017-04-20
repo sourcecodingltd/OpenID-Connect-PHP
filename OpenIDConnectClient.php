@@ -22,13 +22,6 @@
  */
 
 /**
- * Use session to manage a nonce
- */
-if (!isset($_SESSION)) {
-    session_start();
-}
-
-/**
  *
  * JWT signature verification support by Jonathan Reed <jdreed@mit.edu>
  * Licensed under the same license as the rest of this file.
@@ -86,7 +79,7 @@ if (!function_exists('json_decode')) {
 
 /**
  *
- * Please note this class stores nonces in $_SESSION['openid_connect_nonce']
+ * Please note this class stores nonces in \Session::get('openid_connect_nonce')
  *
  */
 class OpenIDConnectClient
@@ -190,7 +183,7 @@ class OpenIDConnectClient
             }
 
             // Do an OpenID Connect session check
-            if ($_REQUEST['state'] != $_SESSION['openid_connect_state']) {
+            if ($_REQUEST['state'] != \Session::get('openid_connect_state') ) {
                 throw new OpenIDConnectClientException("Unable to determine state");
             }
 
@@ -213,7 +206,7 @@ class OpenIDConnectClient
             if ($this->verifyJWTclaims($claims)) {
 
                 // Clean up the session a little
-                unset($_SESSION['openid_connect_nonce']);
+                \Session::forget('openid_connect_nonce');
 
                 // Save the access token
                 $this->accessToken = $token_json->access_token;
@@ -339,11 +332,11 @@ class OpenIDConnectClient
         // Generate and store a nonce in the session
         // The nonce is an arbitrary value
         $nonce = $this->generateRandString();
-        $_SESSION['openid_connect_nonce'] = $nonce;
+        \Session::put('openid_connect_nonce', $nonce);
 
         // State essentially acts as a session key for OIDC
         $state = $this->generateRandString();
-        $_SESSION['openid_connect_state'] = $state;
+        \Session::put('openid_connect_state', $state);
 
         $auth_params = array_merge($this->authParams, array(
             'response_type' => $response_type,
