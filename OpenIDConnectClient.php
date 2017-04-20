@@ -207,6 +207,7 @@ class OpenIDConnectClient
 
                 // Clean up the session a little
                 \Session::forget('openid_connect_nonce');
+                \Session::save();
 
                 // Save the access token
                 $this->accessToken = $token_json->access_token;
@@ -337,6 +338,7 @@ class OpenIDConnectClient
         // State essentially acts as a session key for OIDC
         $state = $this->generateRandString();
         \Session::put('openid_connect_state', $state);
+        \Session::save();
 
         $auth_params = array_merge($this->authParams, array(
             'response_type' => $response_type,
